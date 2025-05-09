@@ -1,5 +1,8 @@
-// login_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../services/api_service.dart';
+import '../utils/auth_manager.dart';
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,15 +14,59 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
-  
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  
+  // Inisialisasi API Service
+  final ApiService _apiService = ApiService();
+  
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+  
+  // Fungsi untuk memeriksa koneksi server
+  Future<bool> _checkServerConnection() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      final isConnected = await _apiService.checkServerConnection();
+      
+      if (!isConnected && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Tidak dapat terhubung ke server. Pastikan server berjalan."),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      
+      return isConnected;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: ${e.toString()}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return false;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -44,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  
+
                   // Title
                   Center(
                     child: Text(
@@ -56,9 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
-                  
+
                   // Email Field
                   _buildInputLabel("Email"),
                   TextFormField(
@@ -81,9 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Password Field
                   _buildInputLabel("Password"),
                   TextFormField(
@@ -117,18 +164,68 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Login Button
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: _isLoading ? null : () async {
                         if (_formKey.currentState!.validate()) {
-                          // Process login
-                          Navigator.pushNamed(context, '/welcome');
+                          // Periksa koneksi server terlebih dahulu
+                          final isConnected = await _checkServerConnection();
+                          if (!isConnected) {
+                            return; // Berhenti jika tidak terhubung
+                          }
+                          
+                          // Tampilkan loading
+                          setState(() {
+                            _isLoading = true;
+                          });
+
+                          try {
+                            // Gunakan API Service untuk login
+                            final response = await _apiService.login(
+                              _emailController.text,
+                              _passwordController.text,
+                            );
+
+                            if (!mounted) return;
+                            
+                            setState(() {
+                              _isLoading = false;
+                            });
+
+                            if (response['success'] == true) {
+                              // Login berhasil
+                              final userData = response['data'];
+                              
+                              // Simpan data user
+                              await AuthManager.saveUserData(userData);
+
+                              // Navigasi ke halaman home
+                              Navigator.pushReplacementNamed(context, '/home_with_data');
+                            } else {
+                              // Login gagal
+                              String errorMessage = response['message'] ?? 'Login gagal';
+                              
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(errorMessage)),
+                              );
+                            }
+                          } catch (e) {
+                            if (!mounted) return;
+                            
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -138,18 +235,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Login",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Divider
                   Row(
                     children: [
@@ -167,40 +266,40 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(child: Divider(color: Colors.grey[300])),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Social Login Buttons
                   _buildSocialLoginButton(
-                    icon: "assets/google_icon.png", 
+                    icon: "assets/google_icon.png",
                     text: "Login dengan Google",
                     onPressed: () {
                       // Handle Google login
                     },
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   _buildSocialLoginButton(
-                    icon: "assets/facebook_icon.png", 
+                    icon: "assets/facebook_icon.png",
                     text: "Login dengan Facebook",
                     onPressed: () {
                       // Handle Facebook login
                     },
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   _buildSocialLoginButton(
-                    icon: "assets/apple_icon.png", 
+                    icon: "assets/apple_icon.png",
                     text: "Login dengan Apple ID",
                     onPressed: () {
                       // Handle Apple login
                     },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Register Link
                   Center(
                     child: Row(
@@ -229,7 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
                 ],
               ),
@@ -239,7 +338,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-  
+
   Widget _buildInputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -252,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-  
+
   Widget _buildSocialLoginButton({
     required String icon,
     required String text,

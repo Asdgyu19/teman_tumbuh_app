@@ -1,5 +1,8 @@
-// register_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import '../services/api_service.dart';
+import '../utils/auth_manager.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,17 +15,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
-  
+
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  
+  // Inisialisasi API Service
+  final ApiService _apiService = ApiService();
+  
+  bool _isLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // Fungsi untuk memeriksa koneksi server
+  Future<bool> _checkServerConnection() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      final isConnected = await _apiService.checkServerConnection();
+      
+      if (!isConnected && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Tidak dapat terhubung ke server. Pastikan server berjalan."),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      
+      return isConnected;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: ${e.toString()}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return false;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -47,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  
+
                   // Title
                   Text(
                     "Register",
@@ -57,9 +106,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Colors.blue[500],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Subtitle
                   Text(
                     "Selamat datang di Teman Tumbuh! Ayo daftarkan dirimu, mulai ikuti catatan tumbuh kembang anakmu.",
@@ -68,9 +117,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Colors.grey[600],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
                   
+                  // Name Field
+                  _buildInputLabel("Nama"),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      hintText: "Masukkan nama lengkap",
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Nama tidak boleh kosong';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // Email Field
                   _buildInputLabel("Email"),
                   TextFormField(
@@ -96,9 +169,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Password Field
                   _buildInputLabel("Password"),
                   TextFormField(
@@ -135,9 +208,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Confirm Password Field
                   _buildInputLabel("Konfirmasi password"),
                   TextFormField(
@@ -174,18 +247,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Register Button
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: _isLoading ? null : () async {
                         if (_formKey.currentState!.validate()) {
-                          // Process registration
-                          Navigator.pushNamed(context, '/welcome');
+                          // Periksa koneksi server terlebih dahulu
+                          final isConnected = await _checkServerConnection();
+                          if (!isConnected) {
+                            return; // Berhenti jika tidak terhubung
+                          }
+                          
+                          // Tampilkan loading
+                          setState(() {
+                            _isLoading = true;
+                          });
+
+                          try {
+                            // Gunakan API Service untuk register
+                            final response = await _apiService.register(
+                              _nameController.text,
+                              _emailController.text,
+                              _passwordController.text,
+                            );
+
+                            if (!mounted) return;
+                            
+                            setState(() {
+                              _isLoading = false;
+                            });
+
+                            if (response['success'] == true) {
+                              // Registrasi berhasil
+                              final userData = response['data'];
+                              
+                              // Simpan data user
+                              await AuthManager.saveUserData(userData);
+
+                              // Navigasi ke halaman welcome
+                              Navigator.pushReplacementNamed(context, '/welcome');
+                            } else {
+                              // Registrasi gagal
+                              String errorMessage = response['message'] ?? 'Gagal mendaftar';
+                              
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(errorMessage)),
+                              );
+                            }
+                          } catch (e) {
+                            if (!mounted) return;
+                            
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Terjadi kesalahan: ${e.toString()}')),
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -195,18 +319,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        "Daftar",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Daftar",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Divider
                   Row(
                     children: [
@@ -224,40 +350,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Expanded(child: Divider(color: Colors.grey[300])),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Social Login Buttons
                   _buildSocialLoginButton(
-                    icon: "assets/google_icon.png", 
+                    icon: "assets/google_icon.png",
                     text: "Daftar dengan Google",
                     onPressed: () {
                       // Handle Google sign up
                     },
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   _buildSocialLoginButton(
-                    icon: "assets/facebook_icon.png", 
+                    icon: "assets/facebook_icon.png",
                     text: "Daftar dengan Facebook",
                     onPressed: () {
                       // Handle Facebook sign up
                     },
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   _buildSocialLoginButton(
-                    icon: "assets/apple_icon.png", 
+                    icon: "assets/apple_icon.png",
                     text: "Daftar dengan Apple ID",
                     onPressed: () {
                       // Handle Apple sign up
                     },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Login Link
                   Center(
                     child: Row(
@@ -286,7 +412,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
                 ],
               ),
@@ -296,7 +422,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-  
+
   Widget _buildInputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -309,7 +435,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-  
+
   Widget _buildSocialLoginButton({
     required String icon,
     required String text,
