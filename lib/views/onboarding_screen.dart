@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 
-
-
 class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _currentPage = 0;
 
   List<Map<String, String>> onboardingData = [
@@ -115,11 +115,11 @@ class OnboardingPage extends StatelessWidget {
   final String image, title, description;
 
   const OnboardingPage({
-    Key? key,
+    super.key,
     required this.image,
     required this.title,
     required this.description,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

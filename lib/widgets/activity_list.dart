@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ActivityList extends StatelessWidget {
   final List<String> activities;
 
-  ActivityList({required this.activities});
+  const ActivityList({super.key, required this.activities});
 
   @override
   Widget build(BuildContext context) {

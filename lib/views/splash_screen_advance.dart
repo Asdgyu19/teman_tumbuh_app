@@ -1,6 +1,5 @@
 // splash_screen_advanced.dart
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

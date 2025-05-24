@@ -6,7 +6,7 @@ class UserGreetingCard extends StatelessWidget {
   final String imagePath;
   final Widget? actionWidget;
 
-  UserGreetingCard({
+  const UserGreetingCard({super.key, 
     required this.title,
     required this.description,
     required this.imagePath,

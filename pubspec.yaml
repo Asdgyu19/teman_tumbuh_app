@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   http: ^1.1.0
   flutter_secure_storage: ^8.0.0
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:
@@ -40,4 +40,7 @@ flutter:
     - assets/google_icon.png
     - assets/facebook_icon.png
     - assets/apple_icon.png
+    - assets/ubi.png
+    - assets/bubur.png
+    - assets/perkedel.png
 

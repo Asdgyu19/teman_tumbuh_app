@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ArticleList extends StatelessWidget {
   final String imagePath;
 
-  ArticleList({required this.imagePath});
+  const ArticleList({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {

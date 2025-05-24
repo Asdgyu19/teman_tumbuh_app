@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MenuList extends StatelessWidget {
   final List<Map<String, String>> menus;
 
-  MenuList({required this.menus});
+  const MenuList({super.key, required this.menus});
 
   @override
   Widget build(BuildContext context) {
