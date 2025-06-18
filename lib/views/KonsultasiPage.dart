@@ -39,7 +39,7 @@ class KonsultasiPage extends StatelessWidget {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/cari_dokter');
+                      Navigator.pushNamed(context, '/cari-dokter-page');
                     },
                     child: Column(
                       children: const [

@@ -94,6 +94,7 @@ class MyApp extends StatelessWidget {
         '/detail_mpasi': (context) => const DetailMPASIPage(),
         '/detail_artikel': (context) => const DetailArtikelPage(),
         '/kebutuhan_mpasi': (context) => const KebutuhanMPASIPage(),
+         '/cari-dokter-page': (context) => const CariDokterPage(),
       },
     );
   }

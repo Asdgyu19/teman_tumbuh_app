@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import '../services/auth_service.dart'; 
+import '../services/auth_service.dart';
+
 class HomeWithoutData extends StatefulWidget {
   const HomeWithoutData({super.key});
 
@@ -11,8 +12,8 @@ class HomeWithoutData extends StatefulWidget {
 class _HomeWithoutDataState extends State<HomeWithoutData> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  final AuthService _authService = AuthService(); 
-  
+  final AuthService _authService = AuthService();
+
   // State variables
   List<dynamic> _popularQuestions = [];
   List<dynamic> _recommendedArticles = [];
@@ -20,7 +21,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
   bool _hasError = false;
   String _errorMessage = '';
   String _userName = 'User'; // Default name
-  
+
   void _onNavBarTap(int index) {
     setState(() {
       _currentIndex = index;
@@ -54,13 +55,16 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
     setState(() {
       _isLoading = true;
       _hasError = false;
+      _errorMessage = ''; // Clear previous error message
+      _popularQuestions = []; // Clear previous data
+      _recommendedArticles = []; // Clear previous data
     });
-    
+
     try {
       // Fetch data dengan null safety
       final questionsResponse = await _apiService.getPopularQuestions();
       final articlesResponse = await _apiService.getRecommendedArticles();
-      
+
       setState(() {
         // Handle null responses dengan memberikan empty list sebagai fallback
         _popularQuestions = questionsResponse ?? [];
@@ -71,8 +75,8 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = 'Failed to load data: $e';
-        // Set empty lists even on error
+        _errorMessage = 'Gagal memuat data. Silakan coba lagi.';
+        // Set empty lists even on error to prevent null issues in UI
         _popularQuestions = [];
         _recommendedArticles = [];
       });
@@ -113,18 +117,17 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
             const Spacer(),
             IconButton(
               icon: const Icon(Icons.notifications_none, color: Colors.white),
-              onPressed: () {},
+              onPressed: () {
+                // TODO: Handle notification tap
+              },
             ),
           ],
         ),
       ),
-      body: _isLoading 
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: () async {
-                await _loadUserData();
-                await _loadData();
-              },
+              onRefresh: _loadData, // Call _loadData for refresh
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(), // Untuk refresh indicator
                 child: Column(
@@ -142,21 +145,21 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning, color: Colors.orange, size: 20),
+                            Icon(Icons.warning, color: Colors.orange[800], size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Beberapa data tidak dapat dimuat. Tarik ke bawah untuk refresh.',
+                                _errorMessage,
                                 style: TextStyle(color: Colors.orange[800], fontSize: 12),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    
+
                     // Empty state for child data
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 310, vertical: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                       margin: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -182,6 +185,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                             ),
+                            textAlign: TextAlign.center, // Center text
                           ),
                           const SizedBox(height: 16),
                           SizedBox(
@@ -192,7 +196,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
                               },
                               icon: const Icon(Icons.add, color: Colors.white),
                               label: const Text(
-                                'Tambah',
+                                'Tambah Data Anak', // More descriptive text
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -274,7 +278,9 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              // TODO: Implement "Lihat Semua" functionality for questions/articles
+            },
             child: const Text(
               'Lihat Semua',
               style: TextStyle(
@@ -304,8 +310,11 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
                 Icon(Icons.help_outline, color: Colors.grey[400], size: 48),
                 const SizedBox(height: 8),
                 Text(
-                  'Belum ada pertanyaan populer',
+                  _hasError
+                      ? 'Gagal memuat pertanyaan. Tarik untuk refresh.'
+                      : 'Belum ada pertanyaan populer saat ini.',
                   style: TextStyle(color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -313,12 +322,12 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
         ),
       );
     }
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: _popularQuestions.map((question) {
-          // Null safety untuk setiap question
+          // Null safety check for each item in the list
           if (question == null) return const SizedBox.shrink();
           return _buildQuestionCard(Map<String, dynamic>.from(question));
         }).toList(),
@@ -349,7 +358,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
               children: [
                 Expanded(
                   child: Text(
-                    question['title']?.toString() ?? 'Pertanyaan',
+                    question['title']?.toString() ?? 'Judul Pertanyaan Tidak Tersedia',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -398,7 +407,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
             ),
             const SizedBox(height: 8),
             Text(
-              question['content']?.toString() ?? 'Tidak ada konten',
+              question['content']?.toString() ?? 'Konten tidak tersedia.',
               style: const TextStyle(
                 fontSize: 14,
               ),
@@ -414,7 +423,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Container(
-          height: 120,
+          height: 180, // Adjusted height for consistency with article cards
           decoration: BoxDecoration(
             color: Colors.grey[50],
             borderRadius: BorderRadius.circular(12),
@@ -426,8 +435,11 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
                 Icon(Icons.article_outlined, color: Colors.grey[400], size: 48),
                 const SizedBox(height: 8),
                 Text(
-                  'Belum ada artikel rekomendasi',
+                  _hasError
+                      ? 'Gagal memuat artikel. Tarik untuk refresh.'
+                      : 'Belum ada artikel rekomendasi saat ini.',
                   style: TextStyle(color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -435,16 +447,16 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
         ),
       );
     }
-    
+
     return Container(
-      height: 220,
+      height: 220, // Adjusted height to accommodate full card size
       padding: const EdgeInsets.only(left: 16),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _recommendedArticles.length,
         itemBuilder: (context, index) {
           final article = _recommendedArticles[index];
-          if (article == null) return const SizedBox.shrink();
+          if (article == null) return const SizedBox.shrink(); // Null safety for each item
           return _buildArticleCard(Map<String, dynamic>.from(article));
         },
       ),
@@ -463,7 +475,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  article['thumbnail']?.toString() ?? '',
+                  article['thumbnail']?.toString() ?? '', // Use null-safe access
                   width: 180,
                   height: 120,
                   fit: BoxFit.cover,
@@ -507,7 +519,7 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
           ),
           const SizedBox(height: 12),
           Text(
-            article['title']?.toString() ?? 'Judul artikel',
+            article['title']?.toString() ?? 'Judul artikel tidak tersedia',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -527,23 +539,27 @@ class _HomeWithoutDataState extends State<HomeWithoutData> {
       ),
     );
   }
-  
+
   String _formatDate(String dateString) {
     if (dateString.isEmpty) return 'Tanggal tidak tersedia';
-    
+
     try {
       final date = DateTime.parse(dateString);
       return '${date.day} ${_getMonthName(date.month)} ${date.year}';
     } catch (e) {
+      print('Error parsing date: $e'); // Log the error for debugging
       return 'Tanggal tidak valid';
     }
   }
-  
+
   String _getMonthName(int month) {
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
       'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
     ];
-    return months[month - 1];
+    if (month >= 1 && month <= 12) {
+      return months[month - 1];
+    }
+    return ''; // Return empty string for invalid month
   }
 }
