@@ -1,4 +1,3 @@
-// detail_artikel.dart
 import 'package:flutter/material.dart';
 
 class DetailArtikelPage extends StatelessWidget {
@@ -17,7 +16,7 @@ class DetailArtikelPage extends StatelessWidget {
               Stack(
                 children: [
                   Image.asset(
-                    'assets/images/artikel.png',
+                    'assets/artikel_sample.png', // Ganti sesuai gambar kamu
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
@@ -39,8 +38,8 @@ class DetailArtikelPage extends StatelessWidget {
                   ),
                 ],
               ),
-              
-              // Title
+
+              // Title & Content
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -54,52 +53,54 @@ class DetailArtikelPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
-                    // Content
+
                     const Text(
                       "Rekomendasi Makanan Sehat untuk si Kecil\n"
                       "Memberikan makanan sehat untuk si kecil sangat penting untuk pertumbuhan dan perkembangan mereka. Berikut beberapa rekomendasi makanan sehat yang dapat diberikan kepada si kecil:",
                       style: TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     _buildNumberedItem(
                       number: 1,
                       title: "Bubur Beras dengan Buah Segar",
-                      content: "Bubur beras akan memberikan karbohidrat yang dibutuhkan si kecil. Tambahkan buah segar seperti pisang, stroberi, atau apel yang sudah dihaluskan untuk menambah rasa dan vitamin.",
+                      content:
+                          "Bubur beras akan memberikan karbohidrat yang dibutuhkan si kecil. Tambahkan buah segar seperti pisang, stroberi, atau apel yang sudah dihaluskan untuk menambah rasa dan vitamin.",
                     ),
-                    
                     _buildNumberedItem(
                       number: 2,
                       title: "Telur Rebus atau Orak-arik dengan Sayuran",
-                      content: "Telur kaya akan protein dan nutrisi penting lainnya. Sajikan dalam bentuk rebus atau orak-arik dengan tambahan sayuran seperti wortel cincang untuk menambah serat dan vitamin.",
+                      content:
+                          "Telur kaya akan protein dan nutrisi penting lainnya. Sajikan dalam bentuk rebus atau orak-arik dengan tambahan sayuran seperti wortel cincang untuk menambah serat dan vitamin.",
                     ),
-                    
                     _buildNumberedItem(
                       number: 3,
                       title: "Sup Ayam dengan Sayuran Warna-warni",
-                      content: "Sup ayam dengan sayuran warna-warni seperti wortel, kentang, dan brokoli tidak hanya lezat tetapi juga kaya nutrisi. Daging ayam memberikan protein yang dibutuhkan untuk pertumbuhan.",
+                      content:
+                          "Sup ayam dengan sayuran warna-warni seperti wortel, kentang, dan brokoli tidak hanya lezat tetapi juga kaya nutrisi. Daging ayam memberikan protein yang dibutuhkan untuk pertumbuhan.",
                     ),
-                    
                     _buildNumberedItem(
                       number: 4,
                       title: "Kentang dengan Daging dan Sayuran",
-                      content: "Kentang adalah sumber karbohidrat yang baik. Kombinasikan dengan daging cincang dan sayuran hijau untuk mendapatkan menu lengkap dengan nutrisi seimbang.",
+                      content:
+                          "Kentang adalah sumber karbohidrat yang baik. Kombinasikan dengan daging cincang dan sayuran hijau untuk mendapatkan menu lengkap dengan nutrisi seimbang.",
                     ),
-                    
                     _buildNumberedItem(
                       number: 5,
                       title: "Smoothie Buah dengan Yogurt",
-                      content: "Yogurt kaya akan probiotik yang baik untuk pencernaan si kecil. Tambahkan buah-buahan segar untuk membuat smoothie yang kaya nutrisi dan juga disukai si kecil karena rasanya yang manis.",
+                      content:
+                          "Yogurt kaya akan probiotik yang baik untuk pencernaan si kecil. Tambahkan buah-buahan segar untuk membuat smoothie yang kaya nutrisi dan juga disukai si kecil karena rasanya yang manis.",
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Share Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Fungsi share bisa ditambahkan di sini
+                        },
                         icon: const Icon(Icons.share, color: Colors.white),
                         label: const Text(
                           "Bagikan Artikel",
@@ -126,8 +127,12 @@ class DetailArtikelPage extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildNumberedItem({required int number, required String title, required String content}) {
+
+  Widget _buildNumberedItem({
+    required int number,
+    required String title,
+    required String content,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(

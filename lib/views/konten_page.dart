@@ -227,9 +227,9 @@ class _KontenPageState extends State<KontenPage> with SingleTickerProviderStateM
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              _resepCardHorizontal("Bubur Beras Wortel", "assets/images/bubur.png", "30 menit"),
-              _resepCardHorizontal("Ubi Wangi", "assets/images/ubi.png", "45 menit"),
-              _resepCardHorizontal("Perkedel Ayam", "assets/images/perkedel.png", "45 menit"),
+              _resepCardHorizontal("Bubur Beras Wortel", "assets/bubur.png", "30 menit"),
+              _resepCardHorizontal("Ubi Wangi", "assets/ubi.png", "45 menit"),
+              _resepCardHorizontal("Perkedel Ayam", "assets/perkedel.png", "45 menit"),
             ],
           ),
         ),
@@ -310,9 +310,9 @@ class _KontenPageState extends State<KontenPage> with SingleTickerProviderStateM
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              _resepCardHorizontal("Bubur Beras Wortel", "assets/images/bubur.png", "30 menit"),
-              _resepCardHorizontal("Ubi Wangi", "assets/images/ubi.png", "45 menit"),
-              _resepCardHorizontal("Perkedel Ayam", "assets/images/perkedel.png", "45 menit"),
+              _resepCardHorizontal("Bubur Beras Wortel", "assets/bubur.png", "30 menit"),
+              _resepCardHorizontal("Ubi Wangi", "assets/ubi.png", "45 menit"),
+              _resepCardHorizontal("Perkedel Ayam", "assets/perkedel.png", "45 menit"),
             ],
           ),
         ),
@@ -446,7 +446,7 @@ class _KontenPageState extends State<KontenPage> with SingleTickerProviderStateM
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   image: const DecorationImage(
-                    image: AssetImage('assets/images/bubur.png'),
+                    image: AssetImage('assets/bubur.png'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -523,7 +523,7 @@ class _KontenPageState extends State<KontenPage> with SingleTickerProviderStateM
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   image: const DecorationImage(
-                    image: AssetImage('assets/images/artikel.png'),
+                    image: AssetImage('assets/artikel.png'),
                     fit: BoxFit.cover,
                   ),
                 ),

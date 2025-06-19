@@ -14,6 +14,7 @@ dependencies:
   http: ^1.1.0
   flutter_secure_storage: ^8.0.0
   shared_preferences: ^2.2.2
+  uuid: ^4.5.1
 
 
 dev_dependencies:
@@ -53,3 +54,4 @@ flutter:
     - assets/doktif.jpg
     - assets/dokter1.jpg
     - assets/ricard-lee.jpg
+    - assets/artikel.png

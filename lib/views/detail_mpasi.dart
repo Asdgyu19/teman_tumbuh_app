@@ -17,7 +17,7 @@ class DetailMPASIPage extends StatelessWidget {
               Stack(
                 children: [
                   Image.asset(
-                    'assets/images/bubur.png',
+                    'assets/bubur.png',
                     width: double.infinity,
                     height: 250,
                     fit: BoxFit.cover,

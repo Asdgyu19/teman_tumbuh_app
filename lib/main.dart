@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:teman_tumbuh/views/KonsultasiPage.dart';
 import 'package:teman_tumbuh/views/cari-dokter-page.dart';
+import 'package:teman_tumbuh/views/chat_doctor_page.dart';
 import 'package:teman_tumbuh/views/detail_artikel.dart';
 import 'package:teman_tumbuh/views/detail_mpasi.dart';
 import 'package:teman_tumbuh/views/kebutuhan_mpasi.dart';
@@ -94,7 +95,12 @@ class MyApp extends StatelessWidget {
         '/detail_mpasi': (context) => const DetailMPASIPage(),
         '/detail_artikel': (context) => const DetailArtikelPage(),
         '/kebutuhan_mpasi': (context) => const KebutuhanMPASIPage(),
-         '/cari-dokter-page': (context) => const CariDokterPage(),
+        '/cari-dokter-page': (context) => const CariDokterPage(),
+        '/chat_doctor_page': (context) => const ChatDoctorPage(
+              doctorName: 'Dr. Example',
+              doctorSpecialty: 'Pediatrician',
+              doctorImage: 'assets/images/doctor_example.png', doctorId: '',
+            ),
       },
     );
   }
